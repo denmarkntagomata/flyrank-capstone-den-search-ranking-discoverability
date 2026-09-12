@@ -1,15 +1,14 @@
-# Den_Search_Ranking_Discoverability_Capstone
+# flyrank-capstone-den-search-ranking-discoverability
 
-**Google Search Ranking & Discoverability Capstone — FlyRank AI Machine Learning Engineering Internship**
-**Lane chosen:** Refresh / Content Opportunity Scoring
-**Author:** Denmark Nercua Tagomata (Den)
+**Google Search Ranking & Discoverability Capstone — FlyRank AI Machine Learning Engineering Internship**  
+**Lane chosen:** Refresh / Content Opportunity Scoring  
+**Author:** Denmark Tagomata
 
-Score pages that are growing, declining, recovering, or worth review, using a
-leakage-safe (out-of-time) validation design, and turn the result into a
-ranked, explainable action list with reason codes.
+---
 
-👉 **Deployed research paper:** see `submission/paper_url.txt` once deployed
-(instructions below), or open `paper/index.html` directly.
+Score pages that are growing, declining, recovering, or worth review, using a leakage-safe (out-of-time) validation design, and turn the result into a ranked, explainable action list with reason codes.
+
+👉 **Deployed research paper:** see `submission/paper_url.txt` once deployed (instructions below), or open `paper/index.html` directly.
 
 ---
 
