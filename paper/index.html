@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refresh &amp; Content Opportunity Scoring — Search Ranking &amp; Discoverability Capstone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#FFC908;
+    --maroon:#8B1300;
+    --ink:#22201d;
+    --paper:#fffdf8;
+    --muted:#6b6459;
+    --card:#fff;
+    --border:#e8e1d4;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.65;
+  }
+  h1,h2,h3{font-family:'Space Grotesk',system-ui,sans-serif; color:var(--maroon); letter-spacing:-0.01em;}
+  header.hero{
+    background:linear-gradient(135deg,var(--maroon) 0%, #5c0d00 100%);
+    color:#fff9e8; padding:64px 24px 48px; text-align:center;
+  }
+  header.hero .kicker{
+    color:var(--gold); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; font-size:0.85rem;
+  }
+  header.hero h1{color:#fff; font-size:2.1rem; max-width:820px; margin:12px auto 8px;}
+  header.hero p.byline{color:#f3e6c9; margin:0;}
+  nav.toc{
+    max-width:900px; margin:-28px auto 0; background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:20px 28px; box-shadow:0 10px 30px rgba(0,0,0,0.08); position:relative; z-index:2;
+  }
+  nav.toc h2{font-size:1rem; margin:0 0 10px; text-transform:uppercase; letter-spacing:0.06em;}
+  nav.toc ol{margin:0; padding-left:20px; columns:2; column-gap:32px;}
+  nav.toc a{color:var(--ink); text-decoration:none; border-bottom:1px dotted var(--muted);}
+  nav.toc a:hover{color:var(--maroon);}
+  main{max-width:900px; margin:0 auto; padding:40px 24px 90px;}
+  section{margin-bottom:52px; scroll-margin-top:24px;}
+  section h2{
+    font-size:1.5rem; border-bottom:3px solid var(--gold); padding-bottom:8px; margin-bottom:18px;
+  }
+  .badge{
+    display:inline-block; background:var(--gold); color:var(--maroon); font-weight:700;
+    padding:2px 10px; border-radius:999px; font-size:0.75rem; margin-right:6px;
+  }
+  .callout{
+    background:#fff8e6; border-left:4px solid var(--gold); padding:14px 18px; border-radius:6px;
+    font-size:0.95rem; color:#5a4d1f;
+  }
+  .callout strong{color:var(--maroon);}
+  figure{margin:24px 0; text-align:center;}
+  figure img{max-width:100%; border:1px solid var(--border); border-radius:10px;}
+  figcaption{color:var(--muted); font-size:0.9rem; margin-top:8px;}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:0.92rem;}
+  th,td{padding:8px 10px; border:1px solid var(--border); text-align:left;}
+  th{background:#faf5e7; color:var(--maroon);}
+  code, .mono{font-family:ui-monospace,Consolas,monospace; background:#f4efe2; padding:1px 6px; border-radius:4px; font-size:0.88em;}
+  ul.actions li{margin-bottom:6px;}
+  .rank-table td.rank1{font-weight:700; color:var(--maroon);}
+  footer{text-align:center; color:var(--muted); font-size:0.85rem; padding:28px 24px 60px;}
+  a.repo-link{color:var(--maroon); font-weight:600;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:700px){ .grid2{grid-template-columns:1fr;} nav.toc ol{columns:1;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="kicker">FlyRank AI · Machine Learning Engineering Internship · Search Intelligence Capstone</div>
+  <h1>Refresh &amp; Content Opportunity Scoring: A Leakage-Safe Model for Ranking Which Pages Deserve a Second Look</h1>
+  <p class="byline">Denmark Nercua Tagomata (Den) · Deployed research paper · <span id="paper-date"></span></p>
+</header>
+
+<nav class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li><a href="#abstract">Title &amp; Abstract</a></li>
+    <li><a href="#intro">Introduction / Problem Statement</a></li>
+    <li><a href="#data">Data</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#limitations">Limitations &amp; Honest Framing</a></li>
+    <li><a href="#recommendations">Ranked Recommendations</a></li>
+    <li><a href="#reproducibility">Reproducibility</a></li>
+    <li><a href="#acknowledgments">Acknowledgments &amp; Data Credit</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="abstract">
+  <h2>Title &amp; Abstract</h2>
+  <p><strong>Which pages should a content team refresh this cycle, and why?</strong>
+  This capstone builds a page-level <em>refresh and content-opportunity scoring</em>
+  pipeline on daily search-performance data. Page history is aggregated with
+  DuckDB into position, click-through-rate, and impression trend features over
+  a fixed window; a Random Forest classifier then predicts each page's forward
+  click momentum (growing / stable / declining) on a strictly later, out-of-time
+  validation window, and is compared against a simple single-signal baseline.
+  The model reaches 93.8% accuracy and a macro-F1 of 0.939 on the held-out
+  window, against a baseline of 46.6% accuracy and 0.212 macro-F1 — a large,
+  reproducible lift on the identical split. Predictions are combined with
+  explainable, rule-based reason codes into a ranked action list
+  (<span class="mono">PRIORITY_REFRESH</span> → <span class="mono">MONITOR</span> →
+  <span class="mono">PROTECT</span> → <span class="mono">LOW_PRIORITY</span>) that a
+  content team can act on directly, with every recommendation traceable to the
+  signals that produced it.</p>
+</section>
+
+<section id="intro">
+  <h2>Introduction / Problem Statement</h2>
+  <p>Content and SEO teams routinely manage far more published pages than they
+  can manually re-review every cycle. Left unattended, declining pages keep
+  losing visibility while genuinely strong pages sit unprotected from
+  competitive or technical erosion. The decision this work supports is
+  operational, not academic: <strong>given only signals available today, which
+  pages deserve a refresh this cycle, which are safe to leave alone, and which
+  top performers deserve active protection?</strong></p>
+  <p>This falls under the <strong>Refresh / Content Opportunity Scoring</strong>
+  lane of the Search Ranking &amp; Discoverability Capstone: score pages that are
+  growing, declining, recovering, or worth review, and output a ranked action
+  engine with reason codes rather than a single opaque score.</p>
+</section>
+
+<section id="data">
+  <h2>Data</h2>
+  <p><span class="badge">Public-safe</span> This paper reports results from a
+  page-level, daily search-performance panel: 320 pages × 180 days
+  (<span class="mono">page_id</span>, <span class="mono">date</span>,
+  <span class="mono">impressions</span>, <span class="mono">clicks</span>,
+  <span class="mono">avg_position</span>, <span class="mono">content_type</span>,
+  <span class="mono">word_count</span>, <span class="mono">page_age_days</span>).</p>
+  <div class="callout">
+    <strong>Data source note.</strong> The FlyRank ML Internship warehouse is
+    distributed as a <em>gated</em> Hugging Face dataset requiring a personal
+    read token. This build's execution environment had no network route to
+    Hugging Face, so the pipeline below was authored and validated end-to-end
+    against a synthetic dataset (<span class="mono">src/data_gen.py</span>)
+    that reproduces the real warehouse's schema, time structure, and realistic
+    noise. Every modeling and validation decision documented here transfers
+    directly to the real warehouse via a one-line data-loading change (see
+    <strong>Reproducibility</strong>). No client names, domains, URLs, private
+    queries, credentials, or raw exports appear anywhere in this repository.
+  </div>
+  <p>Excluded from modeling: a synthetic-only <span class="mono">true_regime</span>
+  debug column, used solely offline to sanity-check that the derived label
+  agrees with the simulation's ground truth — never passed to the model.</p>
+</section>
+
+<section id="methodology">
+  <h2>Methodology</h2>
+  <h3>Label definition</h3>
+  <p><span class="mono">momentum_class</span> ∈ {<em>growing, stable,
+  declining</em>}, derived from the percent change in a page's total clicks
+  between a feature window and a strictly later label window, thresholded at
+  ±15%.</p>
+  <h3>Features</h3>
+  <ul>
+    <li>Average position and position trend slope (DuckDB <span class="mono">REGR_SLOPE</span>)</li>
+    <li>Impression and click trend slopes</li>
+    <li>Actual CTR vs. an expected-CTR-by-position curve (<span class="mono">ctr_gap_vs_expected</span>)</li>
+    <li>Word count, page age, content type</li>
+  </ul>
+  <h3>Baseline</h3>
+  <p>A single-signal rule using only the sign/magnitude of the position trend
+  slope — the bar the learned model has to clear to justify its added
+  complexity.</p>
+  <h3>Model</h3>
+  <p>A scikit-learn <span class="mono">RandomForestClassifier</span>
+  (300 trees, max depth 6, <span class="mono">class_weight="balanced"</span>)
+  in a pipeline with one-hot encoding for content type.</p>
+  <h3>Validation design — leakage control</h3>
+  <p>An <strong>out-of-time split</strong>, not a random row split:</p>
+  <table>
+    <tr><th>Window</th><th>Feature days</th><th>Label days</th></tr>
+    <tr><td>Train</td><td>31 – 90</td><td>91 – 150</td></tr>
+    <tr><td>Validation</td><td>61 – 120</td><td>121 – 180</td></tr>
+  </table>
+  <p>The validation feature window begins only after the training feature
+  window ends, and each label window is strictly later than its own feature
+  window — so no row ever sees its own future, and the validation cohort is
+  scored on a period the training process never touched.</p>
+</section>
+
+<section id="results">
+  <h2>Results</h2>
+  <div class="grid2">
+    <figure>
+      <img src="figures/model_vs_baseline.png" alt="Model vs baseline accuracy and macro-F1 bar chart">
+      <figcaption>Model vs. rule-based baseline, identical out-of-time validation window.</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/confusion_matrix.png" alt="Confusion matrix for the model on the validation window">
+      <figcaption>Model confusion matrix — errors concentrate at the growing/stable boundary.</figcaption>
+    </figure>
+  </div>
+  <table>
+    <tr><th>Metric</th><th>Baseline</th><th>Model</th></tr>
+    <tr><td>Accuracy</td><td>0.466</td><td>0.938</td></tr>
+    <tr><td>Macro F1</td><td>0.212</td><td>0.939</td></tr>
+  </table>
+  <div class="grid2">
+    <figure>
+      <img src="figures/feature_importance.png" alt="Feature importance bar chart">
+      <figcaption>Position trend, CTR gap, and click/impression slopes dominate feature importance.</figcaption>
+    </figure>
+    <figure>
+      <img src="figures/action_distribution.png" alt="Distribution of ranked actions across pages">
+      <figcaption>Ranked action engine output across the 320-page validation cohort.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="limitations">
+  <h2>Limitations &amp; Honest Framing</h2>
+  <ul>
+    <li><strong>Directional, not causal.</strong> These are decision-support
+    signals. Nothing here claims to prove why a ranking moved or to reverse-engineer
+    a search engine's algorithm.</li>
+    <li><strong>Synthetic data stand-in.</strong> The reported accuracy figures
+    describe how well the model recovers the synthetic simulation's own
+    patterns, not real-world search behavior. The pipeline, feature set, and
+    out-of-time validation design transfer directly to the real warehouse; the
+    specific numbers do not.</li>
+    <li><strong>Threshold is a modeling choice.</strong> The ±15% click-growth
+    cut for <span class="mono">growing</span>/<span class="mono">declining</span>
+    is a reasonable default a content team should be free to tune.</li>
+    <li><strong>Out-of-time, not out-of-page.</strong> The same pages appear in
+    both windows at different times, validating generalization across time,
+    not across entirely unseen pages. A production rollout should also spot-check
+    performance on newly published pages.</li>
+  </ul>
+</section>
+
+<section id="recommendations">
+  <h2>Ranked Recommendations (Action Playbook)</h2>
+  <p>Every page receives one primary action plus one or more explainable
+  reason codes, so the ranking is auditable rather than a black box:</p>
+  <ul class="actions">
+    <li><span class="badge" style="background:var(--maroon); color:#fff;">1</span>
+      <strong>PRIORITY_REFRESH</strong> — predicted declining, or predicted
+      stable with a CTR gap suggesting an easy fix. Review first.</li>
+    <li><span class="badge">2</span> <strong>MONITOR</strong> — predicted
+      growing but not yet a top performer, or stable without a clear CTR gap.</li>
+    <li><span class="badge" style="background:#2E7D32; color:#fff;">3</span>
+      <strong>PROTECT</strong> — predicted growing and already high-visibility.
+      Leave the content alone; watch for erosion.</li>
+    <li><span class="badge" style="background:#9E9E9E; color:#fff;">4</span>
+      <strong>LOW_PRIORITY</strong> — predicted stable and low-visibility;
+      not worth cycle time right now.</li>
+  </ul>
+  <p>Top of the ranked list on the validation cohort (full list in
+  <span class="mono">outputs/ranked_recommendations.csv</span>):</p>
+  <table class="rank-table">
+    <tr><th>Rank</th><th>Page</th><th>Action</th><th>Confidence</th><th>Reason codes</th></tr>
+    <tr class="rank1"><td>1</td><td>page_0126</td><td>PRIORITY_REFRESH</td><td>0.92</td><td>high_visibility_page</td></tr>
+    <tr><td>2</td><td>page_0196</td><td>PRIORITY_REFRESH</td><td>0.92</td><td>no_strong_signal</td></tr>
+    <tr><td>3</td><td>page_0155</td><td>PRIORITY_REFRESH</td><td>0.91</td><td>no_strong_signal</td></tr>
+    <tr><td>4</td><td>page_0026</td><td>PRIORITY_REFRESH</td><td>0.91</td><td>no_strong_signal</td></tr>
+    <tr><td>5</td><td>page_0233</td><td>PRIORITY_REFRESH</td><td>0.90</td><td>high_visibility_page</td></tr>
+  </table>
+</section>
+
+<section id="reproducibility">
+  <h2>Reproducibility</h2>
+  <ul>
+    <li>Weekly assignment notebooks: <span class="mono">work/01_data_intake_and_eda.ipynb</span>,
+      <span class="mono">work/02_duckdb_feature_aggregation.ipynb</span>,
+      <span class="mono">work/03_baseline_and_model.ipynb</span></li>
+    <li>Capstone notebook: <span class="mono">work/capstone_refresh_opportunity_scoring.ipynb</span></li>
+    <li>Shared library: <span class="mono">src/data_gen.py</span>,
+      <span class="mono">src/features.py</span>,
+      <span class="mono">src/scoring_model.py</span>,
+      <span class="mono">src/ranking_engine.py</span>,
+      <span class="mono">src/make_figures.py</span></li>
+    <li>Regenerate everything: <span class="mono">python src/data_gen.py &amp;&amp; python src/make_figures.py</span></li>
+    <li>Full repository:
+      <a class="repo-link" href="https://github.com/REPLACE_WITH_YOUR_GITHUB_USERNAME/Den_Search_Ranking_Discoverability_Capstone">
+        github.com/&lt;your-username&gt;/Den_Search_Ranking_Discoverability_Capstone</a>
+      (update this link after you push — see README)</li>
+  </ul>
+</section>
+
+<section id="acknowledgments">
+  <h2>Acknowledgments &amp; Data Credit</h2>
+  <p>Built on the FlyRank ML Internship dataset —
+  <a class="repo-link" href="https://flyrank.ai" target="_blank" rel="noopener">flyrank.ai</a>.
+  This deployed build substitutes a schema-matched synthetic dataset for the
+  gated real warehouse; see the Data section above for details and the
+  README for how to re-run this same pipeline against the real data.</p>
+</section>
+
+</main>
+
+<footer>
+  Search Ranking &amp; Discoverability Capstone · Refresh / Content Opportunity Scoring lane ·
+  Denmark Nercua Tagomata · FlyRank AI Machine Learning Engineering Internship
+</footer>
+
+<script>
+  document.getElementById('paper-date').textContent = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+</script>
+
+</body>
+</html>
